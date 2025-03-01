@@ -1,0 +1,15 @@
+{"time":"2025-02-17T12:33:12.6938118+01:00","level":"INFO","msg":"stream: starting","core version":"0.19.6","symlink path":"C:\\Users\\evans\\OneDrive - IMTBS-TSP\\Cours TSP\\2A\\Cassiopée\\Vision Transformer\\wandb\\run-20250217_123312-lg2spqjq\\logs\\debug-core.log"}
+{"time":"2025-02-17T12:33:13.0941345+01:00","level":"INFO","msg":"created new stream","id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:13.0941345+01:00","level":"INFO","msg":"stream: started","id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:13.0941345+01:00","level":"INFO","msg":"handler: started","stream_id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:13.0946917+01:00","level":"INFO","msg":"writer: Do: started","stream_id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:13.0946917+01:00","level":"INFO","msg":"sender: started","stream_id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:13.4170382+01:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-02-17T12:33:13.8987135+01:00","level":"INFO","msg":"stream: closing","id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:13.8987135+01:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-02-17T12:33:13.8997918+01:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-02-17T12:33:14.7597882+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-02-17T12:33:14.9280813+01:00","level":"INFO","msg":"handler: closed","stream_id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:14.9280813+01:00","level":"INFO","msg":"writer: Close: closed","stream_id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:14.9280813+01:00","level":"INFO","msg":"sender: closed","stream_id":"lg2spqjq"}
+{"time":"2025-02-17T12:33:14.9287675+01:00","level":"INFO","msg":"stream: closed","id":"lg2spqjq"}

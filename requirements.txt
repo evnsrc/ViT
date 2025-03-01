@@ -1,0 +1,8 @@
+open3d
+torchmetrics
+troch_geometric
+pandas
+pyyaml
+wandb
+matplotlib
+pytorch_lightning
