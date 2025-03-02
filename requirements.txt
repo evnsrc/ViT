@@ -1,6 +1,6 @@
 open3d
 torchmetrics
-troch_geometric
+torch_geometric
 pandas
 pyyaml
 wandb
