@@ -6,3 +6,4 @@ pyyaml
 wandb
 matplotlib
 pytorch_lightning
+torchvision
