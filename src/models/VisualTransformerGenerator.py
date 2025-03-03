@@ -70,8 +70,9 @@ class Transformer(nn.Module):
         dec_output = dec_output.view(dec_output.size(0), -1)  # Aplatir les dimensions
         #print("dec_output.shape:", dec_output.shape)
 
-        logits = self.classifier(dec_output)  # [batch_size, num_classes]
-        #print("logits.shape :", logits.shape)  # Doit être [128, 10]
+        generated_image = dec_output.view(-1, 1, 28, 28)  # Reshape en image
+        return generated_image
 
 
-        return logits  # Maintenant sous forme [batch_size, num_classes]
+
+        #return logits  # Maintenant sous forme [batch_size, num_classes]
