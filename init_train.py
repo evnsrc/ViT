@@ -86,7 +86,7 @@ torch.seed = config['trainer_parameters']['manual_seed']
 
 DEVICE = 'cuda'
 print('Device is set to :{}'.format(DEVICE))
-print(torch.cuda.is_available())
+print(torch.cuda.is_available())    
 
 # model hyperparameters
 EPOCHS = config['trainer_parameters']['epochs']
@@ -118,7 +118,7 @@ model_run = Trainer(model=transformer,
 
 model_run.fit(train_dataloader, val_dataloader, EPOCHS)
 #save the model
-torch.save(transformer.state_dict(), 'model.pth')
+torch.save(transformer.state_dict(), 'weights_1passage.pth')
 
 
 
