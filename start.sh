@@ -2,10 +2,6 @@
 
 git pull
 
-mkdir $HOME/public/train1
-mkdir $HOME/public/train2
-mkdir $HOME/public/train3
-
 
 # train1
 python init_train.py
