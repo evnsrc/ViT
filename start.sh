@@ -29,7 +29,6 @@ cp weights.pth $HOME/public/train1/weights9.pth
 python train_again.py
 cp weights.pth $HOME/public/train1/weights10.pth
 
-scp -r jbimal@lyon.grid5000.fr:/home/jbimal/public/train1 /home/patcarbo/Cassiopée/Results/train1
 
 # train 2
 python init_train2.py
@@ -53,7 +52,6 @@ cp weights.pth $HOME/public/train2/weights9.pth
 python train_again2.py
 cp weights.pth $HOME/public/train2/weights10.pth
 
-scp -r jbimal@lyon.grid5000.fr:/home/jbimal/public/train2 /home/patcarbo/Cassiopée/Results/train2
 
 # train 3
 python init_train3.py
@@ -77,6 +75,5 @@ cp weights.pth $HOME/public/train3/weights9.pth
 python train_again3.py
 cp weights.pth $HOME/public/train3/weights10.pth
 
-scp -r jbimal@lyon.grid5000.fr:/home/jbimal/public/train3 /home/patcarbo/Cassiopée/Results/train3
 
 exit
