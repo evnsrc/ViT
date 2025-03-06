@@ -71,5 +71,3 @@ cp weights.pth $HOME/public/train3/weights9.pth
 python train_again3.py
 cp weights.pth $HOME/public/train3/weights10.pth
 
-
-exit
