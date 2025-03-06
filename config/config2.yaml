@@ -2,7 +2,7 @@ model_parameters:
   checkpoint: './models/checkpoints'
   experiment: 'Visual_Transformer'
   device: 'cuda'
-  latent_dim: 64
+  latent_dim: 32
   num_heads: 8
   num_layers: 4
   d_ffn: 512
