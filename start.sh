@@ -1,5 +1,7 @@
 #! /bin/bash
 
+git pull
+
 mkdir $HOME/public/train1
 mkdir $HOME/public/train2
 mkdir $HOME/public/train3
