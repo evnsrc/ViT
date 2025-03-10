@@ -109,7 +109,7 @@ val_dataloader = data.val_dataloader()
 print(f"Utilisation de {DEVICE}")
 transformer = Transformer(LATENT_DIM, N_HEADS, N_LAYERS, DFFN, DROPOUT, NPATCHES).to(DEVICE)
 model = transformer
-model.load_state_dict(torch.load("weights_1passage.pth", weights_only=True), strict=False)
+model.load_state_dict(torch.load("weights.pth", weights_only=True), strict=False)
 
 model_run = Trainer(model, 
                     criterion=nn.CrossEntropyLoss(),
@@ -117,7 +117,8 @@ model_run = Trainer(model,
                     **config['model_parameters']
                     )
 
-model_run.fit(train_dataloader, val_dataloader, EPOCHS)
+tr_LOSS,val_LOSS=append(model_run.fit(train_dataloader, val_dataloader, EPOCHS))
+
 #save the model
 torch.save(transformer.state_dict(), 'weights.pth')
 
