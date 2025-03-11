@@ -117,7 +117,7 @@ model_run = Trainer(model,
                     **config['model_parameters']
                     )
 
-tr_LOSS,val_LOSS=append(model_run.fit(train_dataloader, val_dataloader, EPOCHS))
+tr_LOSS,val_LOSS=model_run.fit(train_dataloader, val_dataloader, EPOCHS)
 
 #save the model
 torch.save(transformer.state_dict(), 'weights.pth')
