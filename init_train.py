@@ -25,6 +25,7 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.nn import MLP, fps, global_max_pool, radius
 from torch_geometric.nn.conv import PointConv
 ##############
+import matplotlib.pyplot as plt
 
 import logging
 import open3d as o3
@@ -117,6 +118,19 @@ model_run = Trainer(model=transformer,
                     )
 
 tr_LOSS,val_LOSS=model_run.fit(train_dataloader, val_dataloader, EPOCHS)
+#crate a csv file to save the loss
+df = pd.DataFrame({'train': tr_LOSS, 'val': val_LOSS})
+df.to_csv('loss.csv', index=False)
+
+
+
+plt.plot(tr_LOSS, label='train')
+plt.plot(val_LOSS, label='val')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
 #save the model
 torch.save(transformer.state_dict(), 'weights.pth')
 

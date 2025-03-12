@@ -47,7 +47,7 @@ class Trainer:
         torch.manual_seed(42)
         self.model.to(self.device)
         tr_loss=[]
-        val_loss=[]
+        val=[]
         #self._wandb_initiate()
         for epoch in tqdm(range(epochs)):
             # train
@@ -57,13 +57,14 @@ class Trainer:
             #wandb.log({"Training Loss": train_loss})
             # validate
             val_loss = self._validate(val_loader)
-            val_loss.append(val_loss)
+            val.append(val_loss)
 
             #wandb.log({"Validation Loss": val_loss})
             #save model state
             self._save_checkpoint(train_loss, val_loss, epoch)
-        return tr_loss, val_loss
             
+        return tr_loss, val
+
 
     #def _wandb_initiate(self):
         #### W&B INIT ###
