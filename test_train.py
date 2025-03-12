@@ -141,7 +141,7 @@ plt.legend()
 plt.show()
 
 #save the model
-filename = f'Train0003/weight_epoch0_loss:{val_LOSS[0]:.4f}.pth'
+filename = f'Train0003/weight_epoch0_loss:{tr_LOSS[0]:.4f}.pth'
 torch.save(transformer.state_dict(), filename)
 
 
@@ -165,7 +165,7 @@ for run in range(100):
 
      # Enregistrer les poids à chaque époque
     # Nom du fichier basé sur l'époque et la perte
-    filename = f'Train0003/weight_epoch{run + 1}_loss:{val_LOSS[run]:.4f}.pth'
+    filename = f'Train0003/weight_epoch{run + 1}_loss:{tr_LOSS[run]:.4f}.pth'
     torch.save(transformer.state_dict(), filename)
 
     # Créer un DataFrame avec les nouvelles valeurs
