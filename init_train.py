@@ -118,6 +118,7 @@ model_run = Trainer(model=transformer,
                     )
 
 tr_LOSS,val_LOSS=model_run.fit(train_dataloader, val_dataloader, EPOCHS)
+
 # Créer un DataFrame avec les nouvelles valeurs
 new_data = pd.DataFrame({'train': tr_LOSS, 'val': val_LOSS})
 

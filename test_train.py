@@ -105,13 +105,11 @@ data.setup()
 train_dataloader = data.train_dataloader()
 val_dataloader = data.val_dataloader()
 ###################
-
 print(f"Utilisation de {DEVICE}")
 transformer = Transformer(LATENT_DIM, N_HEADS, N_LAYERS, DFFN, DROPOUT, NPATCHES).to(DEVICE)
-model = transformer
-model.load_state_dict(torch.load("weights.pth", weights_only=True), strict=False)
 
-model_run = Trainer(model, 
+
+model_run = Trainer(model=transformer, 
                     criterion=nn.CrossEntropyLoss(),
                     optimizer=optim.Adam(transformer.parameters(), config['trainer_parameters']['lr']),
                     **config['model_parameters']
@@ -143,7 +141,58 @@ plt.legend()
 plt.show()
 
 #save the model
-torch.save(transformer.state_dict(), 'weights.pth')
+filename = f'Train0003/weight_epoch0_loss:{val_LOSS[0]:.4f}.pth'
+torch.save(transformer.state_dict(), filename)
+
+
+# Boucle pour exécuter le programme 100 fois
+for run in range(100):
+    print(f"Run {run + 1}/100")
+
+
+
+    transformer = Transformer(LATENT_DIM, N_HEADS, N_LAYERS, DFFN, DROPOUT, NPATCHES).to(DEVICE)
+    model = transformer
+    model.load_state_dict(torch.load("weights.pth", weights_only=True), strict=False)
+
+    model_run = Trainer(model, 
+                        criterion=nn.CrossEntropyLoss(),
+                        optimizer=optim.Adam(transformer.parameters(), config['trainer_parameters']['lr']),
+                        **config['model_parameters']
+                        )
+
+    tr_LOSS,val_LOSS=model_run.fit(train_dataloader, val_dataloader, EPOCHS)
+
+     # Enregistrer les poids à chaque époque
+    # Nom du fichier basé sur l'époque et la perte
+    filename = f'Train0003/weight_epoch{run + 1}_loss:{val_LOSS[run]:.4f}.pth'
+    torch.save(transformer.state_dict(), filename)
+
+    # Créer un DataFrame avec les nouvelles valeurs
+    new_data = pd.DataFrame({'train': tr_LOSS, 'val': val_LOSS})
+
+    # Ajouter les nouvelles valeurs au fichier CSV existant
+    try:
+        # Lire le fichier CSV existant
+        existing_data = pd.read_csv('loss.csv')
+        # Concaténer les anciennes et nouvelles données
+        updated_data = pd.concat([existing_data, new_data], ignore_index=True)
+    except FileNotFoundError:
+        # Si le fichier n'existe pas, créer un nouveau DataFrame
+        updated_data = new_data
+
+    # Sauvegarder le DataFrame mis à jour dans le fichier CSV
+    updated_data.to_csv('loss.csv', index=False)
+
+    plt.plot(tr_LOSS, label='train')
+    plt.plot(val_LOSS, label='val')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
+
+    #save the model
+    torch.save(transformer.state_dict(), 'weights.pth')
 
 
 
