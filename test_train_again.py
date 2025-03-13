@@ -87,6 +87,7 @@ torch.seed = config['trainer_parameters']['manual_seed']
 DEVICE = 'cuda'
 print('Device is set to :{}'.format(DEVICE))
 print(torch.cuda.is_available())    
+print(torch.cuda.is_available())    
 
 # model hyperparameters
 EPOCHS = config['trainer_parameters']['epochs']
@@ -106,46 +107,22 @@ train_dataloader = data.train_dataloader()
 val_dataloader = data.val_dataloader()
 ###################
 print(f"Utilisation de {DEVICE}")
+
+
+# Initialiser le modèle
 transformer = Transformer(LATENT_DIM, N_HEADS, N_LAYERS, DFFN, DROPOUT, NPATCHES).to(DEVICE)
+model = transformer
+model.load_state_dict(torch.load("weights.pth", weights_only=True), strict=False)
 
-
-model_run = Trainer(model=transformer, 
+model_run = Trainer(model, 
                     criterion=nn.CrossEntropyLoss(),
                     optimizer=optim.Adam(transformer.parameters(), config['trainer_parameters']['lr']),
                     **config['model_parameters']
                     )
 
-tr_LOSS,val_LOSS=model_run.fit(train_dataloader, val_dataloader, EPOCHS)
-print("tr_LOSS : ",tr_LOSS)
-print("val_LOSS : ",val_LOSS)
-
-# Créer un DataFrame avec les nouvelles valeurs
-new_data = pd.DataFrame({'train': tr_LOSS, 'val': val_LOSS})
-
-# Ajouter les nouvelles valeurs au fichier CSV existant
-try:
-    # Lire le fichier CSV existant
-    existing_data = pd.read_csv('loss.csv')
-    # Concaténer les anciennes et nouvelles données
-    updated_data = pd.concat([existing_data, new_data], ignore_index=True)
-except FileNotFoundError:
-    # Si le fichier n'existe pas, créer un nouveau DataFrame
-    updated_data = new_data
-
-# Sauvegarder le DataFrame mis à jour dans le fichier CSV
-updated_data.to_csv('loss.csv', index=False)
-
-plt.plot(tr_LOSS, label='train')
-plt.plot(val_LOSS, label='val')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend()
-plt.show()
-
-#save the model
-filename = f'Train0003/weight_epoch0_loss:{tr_LOSS[-1]:.4f}.pth'
-torch.save(transformer.state_dict(), filename)
-
+# Initialiser les listes pour stocker les pertes
+tr_LOSS = []
+val_LOSS = []
 
 # Boucle pour exécuter le programme 100 fois (100 époques)
 for epoch in range(54,100):
