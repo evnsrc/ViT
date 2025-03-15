@@ -1,3 +1,9 @@
+
+
+
+
+
+
 '''
 Train Validate Evaluation Script
 '''
@@ -122,37 +128,13 @@ tr_LOSS,val_LOSS=model_run.fit(train_dataloader, val_dataloader, EPOCHS)
 # Créer un DataFrame avec les nouvelles valeurs
 new_data = pd.DataFrame({'train': tr_LOSS, 'val': val_LOSS})
 
-# Ajouter les nouvelles valeurs au fichier CSV existant
-try:
-    # Lire le fichier CSV existant
-    existing_data = pd.read_csv('loss.csv')
-    # Concaténer les anciennes et nouvelles données
-    updated_data = pd.concat([existing_data, new_data], ignore_index=True)
-except FileNotFoundError:
-    # Si le fichier n'existe pas, créer un nouveau DataFrame
-    updated_data = new_data
-
 # Sauvegarder le DataFrame mis à jour dans le fichier CSV
-updated_data.to_csv('loss.csv', index=False)
+new_data.to_csv('loss.csv', index=False)
 
-plt.plot(tr_LOSS, label='train')
-plt.plot(val_LOSS, label='val')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend()
-plt.show()
+#Sauvegarder le poid 0 dans le fichier de sauvegarde
+filename = f'Train0005/weight_epoch0_loss:{tr_LOSS:.4f}.pth'
+torch.save(transformer.state_dict(), filename)
 
 #save the model
 torch.save(transformer.state_dict(), 'weights.pth')
-
-
-
-
-
-
-
-
-
-
-
 

@@ -1,3 +1,5 @@
+epoch_nbr = int(input("Entrez le nombre de la dernière epoch train : "))
+
 '''
 Train Validate Evaluation Script
 '''
@@ -87,6 +89,7 @@ torch.seed = config['trainer_parameters']['manual_seed']
 DEVICE = 'cuda'
 print('Device is set to :{}'.format(DEVICE))
 print(torch.cuda.is_available())    
+print(torch.cuda.is_available())    
 
 # model hyperparameters
 EPOCHS = config['trainer_parameters']['epochs']
@@ -105,8 +108,10 @@ data.setup()
 train_dataloader = data.train_dataloader()
 val_dataloader = data.val_dataloader()
 ###################
-
 print(f"Utilisation de {DEVICE}")
+
+
+# Initialiser le modèle
 transformer = Transformer(LATENT_DIM, N_HEADS, N_LAYERS, DFFN, DROPOUT, NPATCHES).to(DEVICE)
 model = transformer
 model.load_state_dict(torch.load("weights.pth", weights_only=True), strict=False)
@@ -117,42 +122,37 @@ model_run = Trainer(model,
                     **config['model_parameters']
                     )
 
-tr_LOSS,val_LOSS=model_run.fit(train_dataloader, val_dataloader, EPOCHS)
+# Initialiser les listes pour stocker les pertes
+tr_LOSS = []
+val_LOSS = []
 
-# Créer un DataFrame avec les nouvelles valeurs
-new_data = pd.DataFrame({'train': tr_LOSS, 'val': val_LOSS})
+# Boucle pour exécuter le programme 100 fois (100 époques)
+for epoch in range(epoch_nbr,100):
+    print(f"Epoch {epoch + 1}/100")
 
-# Ajouter les nouvelles valeurs au fichier CSV existant
-try:
-    # Lire le fichier CSV existant
-    existing_data = pd.read_csv('loss.csv')
-    # Concaténer les anciennes et nouvelles données
-    updated_data = pd.concat([existing_data, new_data], ignore_index=True)
-except FileNotFoundError:
-    # Si le fichier n'existe pas, créer un nouveau DataFrame
-    updated_data = new_data
+    # Entraînement du modèle pour une époque
+    tr_loss, val_loss = model_run.fit(train_dataloader, val_dataloader, 1)  # 1 époque
+    print("tr_loss : ",tr_loss)
+    print("val_loss : ",val_loss)
+    print("")
 
-# Sauvegarder le DataFrame mis à jour dans le fichier CSV
-updated_data.to_csv('loss.csv', index=False)
+    # Ajouter les pertes à la liste
+    tr_LOSS.extend(tr_loss)
+    val_LOSS.extend(val_loss)
 
-plt.plot(tr_LOSS, label='train')
-plt.plot(val_LOSS, label='val')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend()
-plt.show()
+    # Enregistrer les poids à la fin de chaque époque
+    filename = f'Train0005/weight_epoch{epoch + 1}_loss:{tr_loss[-1]:.4f}.pth'
+    torch.save(transformer.state_dict(), filename)
 
-#save the model
-torch.save(transformer.state_dict(), 'weights.pth')
+    # Ajouter directement la nouvelle ligne au fichier CSV
+    new_data = pd.DataFrame({'train': [tr_loss[-1]], 'val': [val_loss[-1]]})
 
-
+    # Ajouter au fichier CSV sans le réécrire entièrement
+    new_data.to_csv('loss.csv', mode='a', header=not os.path.exists('loss.csv'), index=False)
 
 
 
+    # Sauvegarder le modèle final
+    torch.save(transformer.state_dict(), 'weights.pth')
 
-
-
-
-
-
-
+# Fin du programme
