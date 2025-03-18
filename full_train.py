@@ -87,7 +87,6 @@ torch.seed = config['trainer_parameters']['manual_seed']
 DEVICE = 'cuda'
 print('Device is set to :{}'.format(DEVICE))
 print(torch.cuda.is_available())    
-print(torch.cuda.is_available())    
 
 # model hyperparameters
 EPOCHS = config['trainer_parameters']['epochs']
@@ -106,7 +105,6 @@ data.setup()
 train_dataloader = data.train_dataloader()
 val_dataloader = data.val_dataloader()
 ###################
-print(f"Utilisation de {DEVICE}")
 
 # Initialiser les listes pour stocker les pertes
 tr_LOSS = []
@@ -128,13 +126,13 @@ tr_LOSS.extend(tr_loss)
 val_LOSS.extend(val_loss)
 
 # Créer un DataFrame avec les nouvelles valeurs
-new_data = pd.DataFrame({'train': tr_LOSS[-1], 'val': val_LOSS[-1]})
+new_data = pd.DataFrame({'train': tr_LOSS[-1], 'val': val_LOSS[-1]}, index=[0])
 
 # Sauvegarder le DataFrame mis à jour dans le fichier CSV
 new_data.to_csv('loss.csv', index=False)
 
 #Sauvegarder le poid 0 dans le fichier de sauvegarde
-filename = f'Train0006/weight_epoch0_loss:{tr_LOSS[-1]:.4f}.pth'
+filename = f'Train0009/weight_epoch0_loss:{tr_LOSS[-1]:.11f}.pth'
 torch.save(transformer.state_dict(), filename)
 
 #save the model
@@ -156,11 +154,11 @@ for epoch in range(0,100):
     val_LOSS.extend(val_loss)
 
     # Enregistrer les poids à la fin de chaque époque
-    filename = f'Train0006/weight_epoch{epoch + 1}_loss:{tr_loss[-1]:.4f}.pth'
+    filename = f'Train0009/weight_epoch{epoch + 1}_loss:{tr_LOSS[-1]:.11f}.pth'
     torch.save(transformer.state_dict(), filename)
 
     # Ajouter directement la nouvelle ligne au fichier CSV
-    new_data = pd.DataFrame({'train': [tr_loss[-1]], 'val': [val_loss[-1]]})
+    new_data = pd.DataFrame({'train': [tr_LOSS[-1]], 'val': [val_LOSS[-1]]})
 
     # Ajouter au fichier CSV sans le réécrire entièrement
     new_data.to_csv('loss.csv', mode='a', header=not os.path.exists('loss.csv'), index=False)
