@@ -1,9 +1,3 @@
-
-
-
-
-
-
 '''
 Train Validate Evaluation Script
 '''
@@ -132,9 +126,8 @@ new_data = pd.DataFrame({'train': tr_LOSS, 'val': val_LOSS})
 new_data.to_csv('loss.csv', index=False)
 
 #Sauvegarder le poid 0 dans le fichier de sauvegarde
-filename = f'Train0005/weight_epoch0_loss:{tr_LOSS:.4f}.pth'
+filename = f'Train0009/weight_epoch0_loss:{tr_LOSS:.11f}.pth'
 torch.save(transformer.state_dict(), filename)
 
 #save the model
 torch.save(transformer.state_dict(), 'weights.pth')
-
