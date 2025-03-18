@@ -7,7 +7,8 @@ from src.models.VisualTransformerGenerator import Transformer
 import yaml
 import argparse
 
-
+print("cuda : " + str(torch.cuda.is_available()))
+print ("torch version = " + str(torch.__version__))
 
 parser = argparse.ArgumentParser(description='Generic runner for VAE models')
 parser.add_argument('--config',  '-c',
@@ -47,7 +48,7 @@ image= image.to(device)
 # Initialiser le modèle avec les mêmes paramètres que dans ton script
 model = Transformer(hidden_d, n_heads, num_layers, d_ff, dropout, n_patches)
 model.to(device)
-model.load_state_dict(torch.load("./final_motel.pth",map_location=device, weights_only=True), strict=False)
+model.load_state_dict(torch.load("./weight_epoch68_loss0.0030.pth",map_location=device, weights_only=True), strict=False)
 model.eval()  # Mode évaluation
 
 # Passer l'image dans le modèle

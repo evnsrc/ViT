@@ -122,6 +122,11 @@ model_run = Trainer(model,
                     **config['model_parameters']
                     )
 
+# Initialisation du scheduler
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    model_run.optimizer, mode='min', factor=0.1, patience=10, verbose=True
+)
+
 # Initialiser les listes pour stocker les pertes
 tr_LOSS = []
 val_LOSS = []
@@ -141,7 +146,7 @@ for epoch in range(epoch_nbr,100):
     val_LOSS.extend(val_loss)
 
     # Enregistrer les poids à la fin de chaque époque
-    filename = f'Train0005/weight_epoch{epoch + 1}_loss:{tr_loss[-1]:.4f}.pth'
+    filename = f'Train0010/weight_epoch{epoch + 1}_loss:{tr_loss[-1]:.4f}.pth'
     torch.save(transformer.state_dict(), filename)
 
     # Ajouter directement la nouvelle ligne au fichier CSV
@@ -150,6 +155,8 @@ for epoch in range(epoch_nbr,100):
     # Ajouter au fichier CSV sans le réécrire entièrement
     new_data.to_csv('loss.csv', mode='a', header=not os.path.exists('loss.csv'), index=False)
 
+        # Mise à jour du scheduler
+    scheduler.step(val_loss[-1])  # Pour ReduceLROnPlateau
 
 
     # Sauvegarder le modèle final

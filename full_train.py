@@ -139,6 +139,11 @@ torch.save(transformer.state_dict(), filename)
 
 #save the model
 torch.save(transformer.state_dict(), 'weights.pth')
+# Initialisation du scheduler
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    model_run.optimizer, mode='min', factor=0.1, patience=10, verbose=True
+)
+
 
 
 # Boucle pour exécuter le programme 100 fois (100 époques)
@@ -164,6 +169,8 @@ for epoch in range(0,100):
 
     # Ajouter au fichier CSV sans le réécrire entièrement
     new_data.to_csv('loss.csv', mode='a', header=not os.path.exists('loss.csv'), index=False)
+    # Mise à jour du scheduler
+    scheduler.step(val_loss[-1])  # Pour ReduceLROnPlateau
 
 
 

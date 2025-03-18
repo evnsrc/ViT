@@ -97,7 +97,7 @@ class Trainer:
             images = images.to(self.device)
 
             y = y.to(self.device)
-            print(y.shape)  # Doit afficher torch.Size([128])
+            #print(y.shape)  # Doit afficher torch.Size([128])
             #print("test = " + str(y[:5]))    # Vérifie s'il contient des indices de classes (0, 1, 2...)
 
 

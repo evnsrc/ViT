@@ -2,7 +2,7 @@ model_parameters:
   checkpoint: './models/checkpoints'
   experiment: 'Visual_Transformer'
   device: 'cuda'
-  latent_dim: 128
+  latent_dim: 256
   num_heads: 8
   num_layers: 4
   d_ffn: 512
@@ -13,7 +13,7 @@ trainer_parameters:
   weight_decay: 0.0
   manual_seed: 42  #à changer entre 2 entrainements pour obtenirs des résultats différents
   epochs: 1
-  dropout: 0.1 #tester avec 0 de dropout
+  dropout: 0.2 #tester avec 0 de dropout
 
 data_parameters:
   data_path: "./data/MNIST"
