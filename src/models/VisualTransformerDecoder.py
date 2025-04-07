@@ -113,5 +113,7 @@ class VisualTransformerDecoder(nn.Module):
         out = self.linear_decoder(out)
 
         images = depatchify(out, self.n_patches, self.chw).to(self.positional_embeddings.device)
+        images = torch.sigmoid(images)
+
 
         return images
