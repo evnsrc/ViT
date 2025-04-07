@@ -105,7 +105,7 @@ class Trainer:
             #print("reconstructed_image est de la forme : "+ str(reconstructed_image.shape))
             
 
-            loss = self.criterion(reconstructed_image.view(y.shape[0], -1), y)
+            loss = self.criterion(reconstructed_image, images)
 
             loss.backward()
             self.optimizer.step()
@@ -131,7 +131,7 @@ class Trainer:
                 
                 reconstructed_image = self.model(images)
                 
-                loss = self.criterion(reconstructed_image.view(y.shape[0], -1), y)
+                loss = self.criterion(reconstructed_image, images)
 
                 _loss.append(loss.detach().cpu().item())
                 torch.cuda.empty_cache()

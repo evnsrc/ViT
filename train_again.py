@@ -117,7 +117,7 @@ model = transformer
 model.load_state_dict(torch.load("weights.pth", weights_only=True), strict=False)
 
 model_run = Trainer(model, 
-                    criterion=nn.CrossEntropyLoss(),
+                    criterion = nn.MSELoss(),
                     optimizer=optim.Adam(transformer.parameters(), config['trainer_parameters']['lr']),
                     **config['model_parameters']
                     )

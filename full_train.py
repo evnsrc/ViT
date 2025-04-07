@@ -115,7 +115,7 @@ transformer = Transformer(LATENT_DIM, N_HEADS, N_LAYERS, DFFN, DROPOUT, NPATCHES
 
 
 model_run = Trainer(model=transformer, 
-                    criterion=nn.CrossEntropyLoss(),
+                    criterion = nn.MSELoss(),
                     optimizer=optim.Adam(transformer.parameters(), config['trainer_parameters']['lr']),
                     **config['model_parameters']
                     )
