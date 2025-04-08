@@ -127,7 +127,7 @@ class Trainer:
                 #images, _ = data # No need to return
                 images = images.to(self.device)
                 y = y.to(self.device)
-                print("y est de la forme : "+ str(y.shape))
+                #print("y est de la forme : "+ str(y.shape))
                 
                 reconstructed_image = self.model(images)
                 
