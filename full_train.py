@@ -1,3 +1,4 @@
+epoch_nbr = int(input("Entrez le nombre d'époques à faire : "))
 '''
 Train Validate Evaluation Script
 '''
@@ -132,7 +133,7 @@ new_data = pd.DataFrame({'train': tr_LOSS[-1], 'val': val_LOSS[-1]}, index=[0])
 new_data.to_csv('loss.csv', index=False)
 
 #Sauvegarder le poid 0 dans le fichier de sauvegarde
-filename = f'Train0009/weight_epoch0_loss:{tr_LOSS[-1]:.11f}.pth'
+filename = f'Train0019/weight_epoch0_loss:{tr_LOSS[-1]:.11f}.pth'
 torch.save(transformer.state_dict(), filename)
 
 #save the model
@@ -145,7 +146,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
 
 
 # Boucle pour exécuter le programme 100 fois (100 époques)
-for epoch in range(0,100):
+for epoch in range(0,epoch_nbr): 
     print(f"Epoch {epoch + 1}/100")
 
     # Entraînement du modèle pour une époque
@@ -159,7 +160,7 @@ for epoch in range(0,100):
     val_LOSS.extend(val_loss)
 
     # Enregistrer les poids à la fin de chaque époque
-    filename = f'Train0009/weight_epoch{epoch + 1}_loss:{tr_LOSS[-1]:.11f}.pth'
+    filename = f'Train0019/weight_epoch{epoch + 1}_loss:{tr_LOSS[-1]:.11f}.pth'
     torch.save(transformer.state_dict(), filename)
 
     # Ajouter directement la nouvelle ligne au fichier CSV

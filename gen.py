@@ -48,7 +48,7 @@ image= image.to(device)
 # Initialiser le modèle avec les mêmes paramètres que dans ton script
 model = Transformer(hidden_d, n_heads, num_layers, d_ff, dropout, n_patches)
 model.to(device)
-model.load_state_dict(torch.load("./weight_epoch68_loss0.0030.pth",map_location=device, weights_only=True), strict=False)
+model.load_state_dict(torch.load("./test.pth",map_location=device, weights_only=True), strict=False)
 model.eval()  # Mode évaluation
 
 # Passer l'image dans le modèle

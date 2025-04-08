@@ -110,8 +110,10 @@ class VisualTransformerDecoder(nn.Module):
         for block in self.blocks:
             out = block(out, enc_output, src_mask, tgt_mask)
         
-        out = self.linear_decoder(out)
+        out = torch.sigmoid(self.linear_decoder(out))
 
+        #print("Shape out (pre-depatchify):", out.shape)
+        #print("Min / Max:", out.min().item(), "/", out.max().item())
         images = depatchify(out, self.n_patches, self.chw).to(self.positional_embeddings.device)
         images = torch.sigmoid(images)
 

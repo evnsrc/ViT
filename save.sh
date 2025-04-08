@@ -4,10 +4,10 @@
 USER="eracat"
 SERVER="lille.grid5000.fr"
 PLACE=access.grid5000.fr
-REMOTE_PATH="lille/ViT/Train0008"
+REMOTE_PATH="lille/ViT/Train0018"
 REMOTE_PATH2="lille/ViT/loss.csv"
 LOCAL_PATH="/c/Users/evans/OneDrive - IMTBS-TSP/Cours TSP/2A/Cassiopée/Vision Transformer/Results/"
-LOCAL_PATH2="/c/Users/evans/OneDrive - IMTBS-TSP/Cours TSP/2A/Cassiopée/Vision Transformer/Results/Train0008/"
+LOCAL_PATH2="/c/Users/evans/OneDrive - IMTBS-TSP/Cours TSP/2A/Cassiopée/Vision Transformer/Results/Train0018/"
 
 # Nombre d'heures pendant lesquelles exécuter le script
 DURATION=8 

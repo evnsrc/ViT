@@ -2,14 +2,14 @@ model_parameters:
   checkpoint: './models/checkpoints'
   experiment: 'Visual_Transformer'
   device: 'cuda'
-  latent_dim: 256
+  latent_dim: 128
   num_heads: 8
-  num_layers: 4
+  num_layers: 3
   d_ffn: 512
   n_patches: 7
 
 trainer_parameters:
-  lr: 0.0001
+  lr: 0.001
   weight_decay: 0.0
   manual_seed: 42  #à changer entre 2 entrainements pour obtenirs des résultats différents
   epochs: 1
