@@ -1,78 +1,71 @@
-import matplotlib.pyplot as plt
-import pandas as pd
 import os
-import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# Configuration
-num_shadows = 12
-shadow_prefix = "shadow_"
-target_filename = "target_model_losses.csv"
-output_image = "checkpoints/all_models_train_losses.png"
+num_shadow = 20
 
-plt.figure(figsize=(12, 8))
+# Configuration - Génération automatique des noms
+shadow_dirs = [f'shadow_{i}' for i in range(num_shadow)]  # shadow_0 à shadow_19
+directories = shadow_dirs + ['target']  # Ajoute le target à la fin
 
-# Pour déterminer automatiquement les limites X et Y
-min_epoch = float('inf')
-max_epoch = -float('inf')
-min_loss = float('inf')
-max_loss = -float('inf')
+file_names = {f'shadow_{i}': f'shadow_model_{i}_losses.csv' for i in range(num_shadow)}
+file_names['target'] = 'target_model_losses.csv'
 
-# Lire et tracer les données pour chaque modèle shadow
-for i in range(num_shadows):
-    filename = f"{shadow_prefix}{i}_losses.csv"
-    if os.path.exists(filename):
-        try:
-            df = pd.read_csv(filename)
-            plt.plot(df['Epoch'], df['Train Loss'], label=f'Shadow {i}', alpha=0.5)
-            
-            # Mettre à jour les min/max
-            current_min_loss = df['Train Loss'].min()
-            current_max_loss = df['Train Loss'].max()
-            current_max_epoch = df['Epoch'].max()
-            
-            if current_min_loss < min_loss:
-                min_loss = current_min_loss
-            if current_max_loss > max_loss:
-                max_loss = current_max_loss
-            if current_max_epoch > max_epoch:
-                max_epoch = current_max_epoch
-        except Exception as e:
-            print(f"Erreur lors de la lecture de {filename}: {e}")
+# Créer une nouvelle figure avec une taille adaptée à beaucoup de courbes
+plt.figure(figsize=(14, 8))
 
-# Lire et tracer les données pour le modèle target
-if os.path.exists(target_filename):
+# Palette de couleurs distinctes
+colors = plt.cm.tab20.colors  # Utilise une palette avec 20 couleurs distinctes
+
+# Lire et plotter chaque fichier CSV
+for idx, dir_name in enumerate(directories):
+    file_path = os.path.join(dir_name, file_names.get(dir_name, ''))
+    
     try:
-        df_target = pd.read_csv(target_filename)
-        plt.plot(df_target['Epoch'], df_target['Train Loss'], label='Target', color='black', linewidth=2, linestyle='--')
+        # Lire le fichier CSV
+        df = pd.read_csv(file_path)
         
-        # Mettre à jour les min/max pour le target
-        target_min = df_target['Train Loss'].min()
-        target_max = df_target['Train Loss'].max()
-        target_max_epoch = df_target['Epoch'].max()
+        # Choisir une couleur - on réutilise les couleurs si plus de 20 modèles
+        color = colors[idx % len(colors)]
         
-        if target_min < min_loss:
-            min_loss = target_min
-        if target_max > max_loss:
-            max_loss = target_max
-        if target_max_epoch > max_epoch:
-            max_epoch = target_max_epoch
+        # Style différent pour le target model
+        #linewidth = 3 if dir_name == 'target' else 2
+        #linestyle = '-' if dir_name == 'target' else '--'
+        linewidth = 0.8
+        linestyle = '-'
+        
+        # Plotter la courbe Train Loss
+        plt.plot(df['Epoch'], df['Train Loss'], 
+                color=color,
+                linewidth=linewidth,
+                linestyle=linestyle,
+                label=f'{dir_name.replace("_", " ").title()}')
+
+    except FileNotFoundError:
+        print(f"⚠ Fichier non trouvé : {file_path}")
     except Exception as e:
-        print(f"Erreur lors de la lecture de {target_filename}: {e}")
+        print(f"Erreur avec le fichier {file_path}: {str(e)}")
 
-# Définir manuellement les limites des axes
-#plt.xlim(0, max_epoch)  # De 0 au max des epochs
-#plt.ylim(min_loss - 0.1, max_loss + 0.1)  # Avec une petite marge
-plt.xlim(0, 100)
-plt.ylim(0, 4)
+# Personnalisation avancée du graphique
+plt.xlabel('Epoch', fontsize=12)
+plt.ylabel('Train Loss', fontsize=12)
+plt.title('Comparaison des Train Loss: Shadow Models (0-19) vs Target', fontsize=14, pad=20)
+plt.grid(True, linestyle=':', alpha=0.6)
 
-# Ajouter des labels et une légende (inchangé)
-plt.xlabel('Epoch')
-plt.ylabel('Train Loss')
-plt.title('Comparaison des Train Loss entre les modèles Shadow et Target')
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.grid(True, alpha=0.3)
+# Légende externe à droite avec défilement si nécessaire
+plt.legend(fontsize=9, 
+          bbox_to_anchor=(1.05, 1), 
+          loc='upper left',
+          ncol=1,
+          title='Modèles')
 
-# Ajuster les marges et sauvegarder (inchangé)
-plt.tight_layout()
-plt.savefig(output_image, dpi=300, bbox_inches='tight')
-print(f"Graphique sauvegardé sous {output_image}")
+# Ajuster les marges
+plt.tight_layout(rect=[0, 0, 0.85, 1])  # Réduit la largeur pour faire place à la légende
+
+# Enregistrer la figure
+output_filename = 'comparaison_train_losses.png'
+plt.savefig(output_filename, dpi=300, bbox_inches='tight')
+print(f"Graphique sauvegardé sous {output_filename}")
+
+# Fermer la figure
+plt.close()
