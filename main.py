@@ -77,11 +77,14 @@ target_model.train_model(
 )
 
 # Création de modèles d'ombre
-num_shadow_models = 20
+num_train_models = 5
+num_test_models = 5
+num_shadow_models = num_train_models + num_test_models
 shadow_models = []
 
-for i in range(num_shadow_models):
-    print(f"\nTraining shadow model {i+1}/{num_shadow_models}...")
+# Crée les shadows sur les 60 000 images de train
+for i in range(num_train_models):
+    print(f"\nTraining shadow model TRAIN {i+1}/5...")
     model = ViTWithTrajectory(
         image_size=image_size,
         patch_size=patch_size,
@@ -91,22 +94,52 @@ for i in range(num_shadow_models):
         heads=heads,
         mlp_dim=mlp_dim
     ).to(device)
-    
-    # Sous-ensemble des données d'ombre pour ce modèle
-    shadow_subset = Subset(shadow_dataset, np.random.choice(len(shadow_dataset), len(shadow_dataset)//2, replace=False))
-    shadow_sub_loader = DataLoader(shadow_subset, batch_size=batch_size, shuffle=True)
-    
+
+    indices = np.random.choice(len(full_train_dataset), len(full_train_dataset) // 5, replace=False)
+    shadow_subset = Subset(full_train_dataset, indices)
+    shadow_loader = DataLoader(shadow_subset, batch_size=batch_size, shuffle=True)
+
     model.train_model(
-        shadow_sub_loader,
-        target_loader,
+        shadow_loader,
+        shadow_loader,
         epochs,
         criterion,
         optimizer,
         device,
-        save_path=f"./checkpoints/shadow_{i}",
-        model_name=f"shadow_model_{i}"
+        save_path=f"./checkpoints/shadow_train_{i}",
+        model_name=f"shadow_model_train_{i}"
     )
     shadow_models.append(model)
+
+# Crée les shadows sur les 10 000 images de test
+for i in range(num_test_models):
+    print(f"\nTraining shadow model TEST {i+1}/5...")
+    model = ViTWithTrajectory(
+        image_size=image_size,
+        patch_size=patch_size,
+        num_classes=num_classes,
+        dim=dim,
+        depth=depth,
+        heads=heads,
+        mlp_dim=mlp_dim
+    ).to(device)
+
+    indices = np.random.choice(len(full_test_dataset), len(full_test_dataset) // 5, replace=False)
+    shadow_subset = Subset(full_test_dataset, indices)
+    shadow_loader = DataLoader(shadow_subset, batch_size=batch_size, shuffle=True)
+
+    model.train_model(
+        shadow_loader,
+        shadow_loader,
+        epochs,
+        criterion,
+        optimizer,
+        device,
+        save_path=f"./checkpoints/shadow_test_{i}",
+        model_name=f"shadow_model_test_{i}"
+    )
+    shadow_models.append(model)
+
 """
 # Préparation des données pour l'attaque
 def prepare_attack_data(model, dataset, is_member):
