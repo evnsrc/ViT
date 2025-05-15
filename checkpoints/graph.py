@@ -7,78 +7,37 @@ import numpy as np
 num_shadows = 12
 shadow_prefix = "shadow_"
 target_filename = "target_model_losses.csv"
-output_image = "all_models_train_losses.png"
+output_image = "checkpoints/all_models_train_losses.png"
 
 plt.figure(figsize=(12, 8))
 
-# Pour déterminer automatiquement les limites Y
+# Pour déterminer automatiquement les limites X et Y
+min_epoch = float('inf')
+max_epoch = -float('inf')
 min_loss = float('inf')
 max_loss = -float('inf')
 
 # Lire et tracer les données pour chaque modèle shadow
-num_train_shadow_models = 5
-num_test_shadow_models = 5
-shadow_models = []
-
-
-# Crée 5 shadows sur les 60 000 images de train
-for i in range(num_train_shadow_models):
-    print(f"\nTraining shadow model TRAIN {i+1}/5...")
-    model = ViTWithTrajectory(
-        image_size=image_size,
-        patch_size=patch_size,
-        num_classes=num_classes,
-        dim=dim,
-        depth=depth,
-        heads=heads,
-        mlp_dim=mlp_dim
-    ).to(device)
-
-    indices = np.random.choice(len(full_train_dataset), len(full_train_dataset) // 5, replace=False)
-    shadow_subset = Subset(full_train_dataset, indices)
-    shadow_loader = DataLoader(shadow_subset, batch_size=batch_size, shuffle=True)
-
-    model.train_model(
-        shadow_loader,
-        shadow_loader,
-        epochs,
-        criterion,
-        optimizer,
-        device,
-        save_path=f"./checkpoints/shadow_train_{i}",
-        model_name=f"shadow_model_train_{i}"
-    )
-    shadow_models.append(model)
-
-# Crée 5 shadows sur les 10 000 images de test
-for i in range(num_test_shadow_models):
-    print(f"\nTraining shadow model TEST {i+1}/5...")
-    model = ViTWithTrajectory(
-        image_size=image_size,
-        patch_size=patch_size,
-        num_classes=num_classes,
-        dim=dim,
-        depth=depth,
-        heads=heads,
-        mlp_dim=mlp_dim
-    ).to(device)
-
-    indices = np.random.choice(len(full_test_dataset), len(full_test_dataset) // 5, replace=False)
-    shadow_subset = Subset(full_test_dataset, indices)
-    shadow_loader = DataLoader(shadow_subset, batch_size=batch_size, shuffle=True)
-
-    model.train_model(
-        shadow_loader,
-        shadow_loader,
-        epochs,
-        criterion,
-        optimizer,
-        device,
-        save_path=f"./checkpoints/shadow_test_{i}",
-        model_name=f"shadow_model_test_{i}"
-    )
-    shadow_models.append(model)
-
+for i in range(num_shadows):
+    filename = f"{shadow_prefix}{i}_losses.csv"
+    if os.path.exists(filename):
+        try:
+            df = pd.read_csv(filename)
+            plt.plot(df['Epoch'], df['Train Loss'], label=f'Shadow {i}', alpha=0.5)
+            
+            # Mettre à jour les min/max
+            current_min_loss = df['Train Loss'].min()
+            current_max_loss = df['Train Loss'].max()
+            current_max_epoch = df['Epoch'].max()
+            
+            if current_min_loss < min_loss:
+                min_loss = current_min_loss
+            if current_max_loss > max_loss:
+                max_loss = current_max_loss
+            if current_max_epoch > max_epoch:
+                max_epoch = current_max_epoch
+        except Exception as e:
+            print(f"Erreur lors de la lecture de {filename}: {e}")
 
 # Lire et tracer les données pour le modèle target
 if os.path.exists(target_filename):
@@ -89,25 +48,31 @@ if os.path.exists(target_filename):
         # Mettre à jour les min/max pour le target
         target_min = df_target['Train Loss'].min()
         target_max = df_target['Train Loss'].max()
+        target_max_epoch = df_target['Epoch'].max()
+        
         if target_min < min_loss:
             min_loss = target_min
         if target_max > max_loss:
             max_loss = target_max
+        if target_max_epoch > max_epoch:
+            max_epoch = target_max_epoch
     except Exception as e:
         print(f"Erreur lors de la lecture de {target_filename}: {e}")
 
-# Ajuster les limites Y avec une marge de 10%
-margin = 0.1 * (max_loss - min_loss)
-plt.ylim(min_loss - margin, max_loss + margin)
+# Définir manuellement les limites des axes
+#plt.xlim(0, max_epoch)  # De 0 au max des epochs
+#plt.ylim(min_loss - 0.1, max_loss + 0.1)  # Avec une petite marge
+plt.xlim(0, 100)
+plt.ylim(0, 4)
 
-# Ajouter des labels et une légende
+# Ajouter des labels et une légende (inchangé)
 plt.xlabel('Epoch')
 plt.ylabel('Train Loss')
 plt.title('Comparaison des Train Loss entre les modèles Shadow et Target')
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.grid(True, alpha=0.3)
 
-# Ajuster les marges et sauvegarder
+# Ajuster les marges et sauvegarder (inchangé)
 plt.tight_layout()
 plt.savefig(output_image, dpi=300, bbox_inches='tight')
 print(f"Graphique sauvegardé sous {output_image}")
