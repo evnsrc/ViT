@@ -12,22 +12,24 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 image_size = 32
 patch_size = 8
 num_classes = 10
-dim = 128
+dim = 64
 depth = 6
 heads = 8
 mlp_dim = 256
-epochs = 100
+epochs = 80
 batch_size = 64
 
-# Chargement des données CIFAR-10
+# Chargement des données MNIST
 transform = transforms.Compose([
     transforms.Resize(image_size),
     transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    transforms.Normalize((0.5,), (0.5,))  # pour MNIST : 1 canal
 ])
+
 
 full_train_dataset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform)
 full_test_dataset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform)
+full_dataset = torch.utils.data.ConcatDataset([full_train_dataset, full_test_dataset])
 
 # Division en ensembles target et shadow
 indices = np.arange(len(full_dataset))
@@ -77,14 +79,14 @@ target_model.train_model(
 )
 
 # Création de modèles d'ombre
-num_train_models = 5
-num_test_models = 5
+num_train_models = 6
+num_test_models = 6
 num_shadow_models = num_train_models + num_test_models
 shadow_models = []
 
 # Crée les shadows sur les 60 000 images de train
 for i in range(num_train_models):
-    print(f"\nTraining shadow model TRAIN {i+1}/5...")
+    print(f"\nTraining shadow model TRAIN {i+1}/6...")
     model = ViTWithTrajectory(
         image_size=image_size,
         patch_size=patch_size,
@@ -113,7 +115,7 @@ for i in range(num_train_models):
 
 # Crée les shadows sur les 10 000 images de test
 for i in range(num_test_models):
-    print(f"\nTraining shadow model TEST {i+1}/5...")
+    print(f"\nTraining shadow model TEST {i+1}/6...")
     model = ViTWithTrajectory(
         image_size=image_size,
         patch_size=patch_size,

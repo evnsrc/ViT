@@ -8,7 +8,7 @@ import os
 import csv
 
 class ViTWithTrajectory(nn.Module):
-    def __init__(self, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, channels=3):
+    def __init__(self, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, channels=1):
         super().__init__()
         # Initialisation originale du ViT
         self.patch_size = patch_size
