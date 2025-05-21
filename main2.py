@@ -104,13 +104,13 @@ target_model.train_model(
 )
 
 # 2. RECONFIGURATION DES SHADOW MODELS
-num_shadow_models = 3
+num_shadow_models = 5
 
 shadow_models = []
 
-# 1. Shadow models entraînés uniquement sur train (30k shadow_train)
+
 for i in range(num_shadow_models):
-    print(f"\nTraining TRAIN-ONLY shadow model {i+1}/{num_shadow_models}...")
+    print(f"\nTraining shadow model {i+1}/{num_shadow_models}...")
     model = ViTWithTrajectory(
         image_size=image_size,
         patch_size=patch_size,
@@ -120,104 +120,36 @@ for i in range(num_shadow_models):
         heads=heads,
         mlp_dim=mlp_dim
     ).to(device)
-    
-    # Prend 25k du shadow_train (80%) + 5k validation (20%)
+
+    # 3. NOUVELLE STRATÉGIE DE SÉLECTION DES DONNÉES
+    # Prend 25k images aléatoires parmi les 30k shadow_train
     indices = np.random.choice(len(shadow_train), 25000, replace=False)
-    train_subset = Subset(shadow_train, indices)
-    train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
-    
+    shadow_subset = Subset(shadow_train, indices)
+    shadow_loader = DataLoader(shadow_subset, batch_size=batch_size, shuffle=True)
+
+
+    # 4. AJOUT DE LA VALIDATION
     val_indices = [x for x in range(len(shadow_train)) if x not in indices][:5000]
     val_loader = DataLoader(Subset(shadow_train, val_indices), batch_size=batch_size)
-    
+
     model.train_model(
-        train_loader,
+        shadow_loader,
+        #shadow_loader,
         val_loader,
         epochs,
         criterion,
         optimizer,
         device,
-        save_path=f"./checkpoints/shadow_train_only_{i}",
-        model_name=f"shadow_train_only_{i}"
+        save_path=f"./checkpoints/shadow_{i}",
+        model_name=f"shadow_model_{i}",
     )
     shadow_models.append(model)
 
-# 2. Shadow models entraînés uniquement sur test (10k test_data)
-for i in range(num_shadow_models):
-    print(f"\nTraining TEST-ONLY shadow model {i+1}/{num_shadow_models}...")
-    model = ViTWithTrajectory(
-        image_size=image_size,
-        patch_size=patch_size,
-        num_classes=num_classes,
-        dim=dim,
-        depth=depth,
-        heads=heads,
-        mlp_dim=mlp_dim
-    ).to(device)
-    
-    # Prend 8k du test (80%) + 2k validation (20%)
-    indices = np.random.choice(len(test_data), 8000, replace=False)
-    train_subset = Subset(test_data, indices)
-    train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
-    
-    val_indices = [x for x in range(len(test_data)) if x not in indices][:2000]
-    val_loader = DataLoader(Subset(test_data, val_indices), batch_size=batch_size)
-    
-    model.train_model(
-        train_loader,
-        val_loader,
-        epochs,
-        criterion,
-        optimizer,
-        device,
-        save_path=f"./checkpoints/shadow_test_only_{i}",
-        model_name=f"shadow_test_only_{i}"
-    )
-    shadow_models.append(model)
-
-# 3. Shadow models entraînés sur mix 80% train + 20% test
-for i in range(num_shadow_models):
-    print(f"\nTraining MIXED shadow model {i+1}/{num_shadow_models}...")
-    model = ViTWithTrajectory(
-        image_size=image_size,
-        patch_size=patch_size,
-        num_classes=num_classes,
-        dim=dim,
-        depth=depth,
-        heads=heads,
-        mlp_dim=mlp_dim
-    ).to(device)
-    
-    # 20k du shadow_train (80% de 25k) + 5k du test (20% de 25k)
-    train_indices = np.random.choice(len(shadow_train), 20000, replace=False)
-    test_indices = np.random.choice(len(test_data), 5000, replace=False)
-    
-    mixed_train = torch.utils.data.ConcatDataset([
-        Subset(shadow_train, train_indices),
-        Subset(test_data, test_indices)
-    ])
-    train_loader = DataLoader(mixed_train, batch_size=batch_size, shuffle=True)
-    
-    # Validation: 5k du train non utilisés + 2k du test non utilisés
-    val_train_indices = [x for x in range(len(shadow_train)) if x not in train_indices][:5000]
-    val_test_indices = [x for x in range(len(test_data)) if x not in test_indices][:2000]
-    
-    mixed_val = torch.utils.data.ConcatDataset([
-        Subset(shadow_train, val_train_indices),
-        Subset(test_data, val_test_indices)
-    ])
-    val_loader = DataLoader(mixed_val, batch_size=batch_size)
-    
-    model.train_model(
-        train_loader,
-        val_loader,
-        epochs,
-        criterion,
-        optimizer,
-        device,
-        save_path=f"./checkpoints/shadow_mixed_{i}",
-        model_name=f"shadow_mixed_{i}"
-    )
-    shadow_models.append(model)
+test_loader = DataLoader(
+    Subset(test_dataset, indices=range(5000)),  # On prend les premiers 5000 du test set
+    batch_size=batch_size,
+    shuffle=False
+)
 
     # Après entraînement
 mia_results = shadow_models[-1].evaluate_model(  # On utilise le dernier shadow model
