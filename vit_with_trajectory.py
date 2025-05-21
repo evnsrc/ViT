@@ -6,6 +6,7 @@ from tqdm import tqdm
 import torch.nn as nn
 import os
 import csv
+import numpy as np
 
 class ViTWithTrajectory(nn.Module):
     def __init__(self, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, channels=1):
@@ -87,7 +88,7 @@ class ViTWithTrajectory(nn.Module):
             """if save_path:
                 os.makedirs(save_path, exist_ok=True)
                 model_file = os.path.join(save_path, f"{model_name}_epoch_{epoch+1}.pth")
-                torch.save(self.state_dict(), model_file)"""
+                torch.save(self.state_dict(), model_file) """
 
         # Enregistrement des losses après entraînement
         if save_path:
@@ -110,3 +111,33 @@ class ViTWithTrajectory(nn.Module):
                 loss = criterion(outputs, y)
                 total_loss += loss.item()
         return total_loss / len(loader)
+
+
+    def evaluate_model(self, member_loader, non_member_loader, criterion, device):
+        """Version modifiée sans seuil prédéfini"""
+        self.eval()
+        results = {
+            'member_losses': [],
+            'non_member_losses': [],
+            'member_logits': [],
+            'non_member_logits': []
+        }
+
+        with torch.no_grad():
+            # Évaluation membres
+            for x, y in member_loader:
+                x, y = x.to(device), y.to(device)
+                outputs = self(x)
+                loss = criterion(outputs, y)
+                results['member_losses'].append(loss.item())
+                results['member_logits'].append(outputs.cpu().numpy())
+
+            # Évaluation non-membres
+            for x, y in non_member_loader:
+                x, y = x.to(device), y.to(device)
+                outputs = self(x)
+                loss = criterion(outputs, y)
+                results['non_member_losses'].append(loss.item())
+                results['non_member_logits'].append(outputs.cpu().numpy())
+
+        return results  # Retourne les données brutes pour analyse ultérieure
