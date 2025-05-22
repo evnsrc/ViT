@@ -19,7 +19,7 @@ dim = 64
 depth = 6
 heads = 8
 mlp_dim = 256
-epochs = 60
+epochs = 3
 batch_size = 64
 
 
@@ -99,7 +99,7 @@ target_model.train_model(
 )
 
 # 2. RECONFIGURATION DES SHADOW MODELS
-num_shadow_models = 3
+num_shadow_models = 1
 
 shadow_models = []
 
@@ -255,3 +255,105 @@ print(f"\nPerformance avec seuil optimal {optimal_threshold:.4f}")
 print(f"- Exactitude: {accuracy:.2%}")
 print(f"- Vrais positifs: {(predictions[labels == 1] == 1).mean():.2%}")
 print(f"- Faux positifs: {(predictions[labels == 0] == 1).mean():.2%}")
+
+
+# (Tout votre code existant jusqu'à la fin reste inchangé...)
+# =============================================
+# VISUALISATION ET SAUVEGARDE DES RÉSULTATS
+# =============================================
+
+import matplotlib.pyplot as plt
+from sklearn.metrics import auc
+import os
+import pickle
+
+# Création du dossier de résultats si inexistant
+os.makedirs('./results', exist_ok=True)
+
+def save_roc_curve(fpr, tpr, auc_score, threshold, filename):
+    """Sauvegarde la courbe ROC dans un fichier PNG"""
+    plt.figure(figsize=(10, 6))
+    plt.plot(fpr, tpr, color='blue', lw=2, label=f'ROC curve (AUC = {auc_score:.2f})')
+    
+    # Marquer le seuil optimal
+    idx = np.argmin(np.abs(thresholds - threshold))
+    plt.plot(fpr[idx], tpr[idx], 'ro', 
+             label=f'Optimal Threshold {threshold:.2f}\n(FPR={fpr[idx]:.2f}, TPR={tpr[idx]:.2f})')
+    
+    plt.plot([0, 1], [0, 1], 'k--', label='Random (AUC = 0.5)')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate (FPR)')
+    plt.ylabel('True Positive Rate (TPR)')
+    plt.title('Courbe ROC pour l\'attaque Membership Inference')
+    plt.legend(loc="lower right")
+    plt.grid(True)
+    
+    # Sauvegarde en PNG
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"\nCourbe ROC sauvegardée sous {filename}")
+
+def save_loss_distribution(member_losses, non_member_losses, threshold, filename):
+    """Sauvegarde l'histogramme des pertes"""
+    plt.figure(figsize=(10, 6))
+    
+    plt.hist(member_losses, bins=50, alpha=0.5, label="Membres")
+    plt.hist(non_member_losses, bins=50, alpha=0.5, label="Non-membres")
+    plt.axvline(threshold, color='r', linestyle='--', 
+                label=f'Seuil optimal ({threshold:.2f})')
+    
+    plt.xlabel('Loss')
+    plt.ylabel('Fréquence')
+    plt.title('Distribution des pertes pour membres/non-membres')
+    plt.legend()
+    
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Histogramme des pertes sauvegardé sous {filename}")
+
+# Calcul de l'AUC
+roc_auc = auc(fpr, tpr)
+
+# 1. Sauvegarde de la courbe ROC
+save_roc_curve(fpr, tpr, roc_auc, optimal_threshold, './results/roc_curve.png')
+
+# 2. Sauvegarde de l'histogramme des pertes
+save_loss_distribution(mia_results['member_losses'], 
+                      mia_results['non_member_losses'],
+                      optimal_threshold,
+                      './results/loss_distribution.png')
+
+# 3. Affichage des métriques dans la console
+print("\n" + "="*50)
+print("RÉSULTATS COMPLETS DE L'ATTAQUE MIA")
+print("="*50)
+print(f"- Aire sous la courbe ROC (AUC): {roc_auc:.4f}")
+print(f"- Seuil optimal calculé: {optimal_threshold:.4f}")
+print(f"- Exactitude au seuil optimal: {accuracy:.2%}")
+print(f"- Sensibilité (TPR): {(predictions[labels == 1] == 1).mean():.2%}")
+print(f"- Spécificité: {(predictions[labels == 0] == 0).mean():.2%}")
+print(f"- Taux de Faux Positifs (FPR): {(predictions[labels == 0] == 1).mean():.2%}")
+
+# 4. Sauvegarde des données brutes
+results = {
+    'fpr': fpr,
+    'tpr': tpr,
+    'auc': roc_auc,
+    'thresholds': thresholds,
+    'optimal_threshold': optimal_threshold,
+    'member_losses': mia_results['member_losses'],
+    'non_member_losses': mia_results['non_member_losses'],
+    'metrics': {
+        'accuracy': accuracy,
+        'tpr': (predictions[labels == 1] == 1).mean(),
+        'fpr': (predictions[labels == 0] == 1).mean()
+    }
+}
+
+with open('./results/mia_results.pkl', 'wb') as f:
+    pickle.dump(results, f)
+
+print("\nDonnées brutes sauvegardées sous ./results/mia_results.pkl")
+print("Vous pouvez charger ces données pour analyse ultérieure avec:")
+print(">>> import pickle\n>>> with open('./results/mia_results.pkl', 'rb') as f:\n>>>     data = pickle.load(f)")
