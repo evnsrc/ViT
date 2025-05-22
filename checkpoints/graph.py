@@ -2,70 +2,78 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-num_shadow = 20
+# Configuration des répertoires à explorer
+directories = [f"shadow_test_only_{i}" for i in range(3)] + \
+              [f"shadow_train_only_{i}" for i in range(3)] + \
+              [f"shadow_mixed_{i}" for i in range(3)] + \
+              ["target"]
 
-# Configuration - Génération automatique des noms
-shadow_dirs = [f'shadow_{i}' for i in range(num_shadow)]  # shadow_0 à shadow_19
-directories = shadow_dirs + ['target']  # Ajoute le target à la fin
+# Fichiers attendus
+file_names = {
+    'shadow_mixed_0': 'shadow_mixed_0_losses.csv',
+    'shadow_mixed_1': 'shadow_mixed_1_losses.csv',
+    'shadow_mixed_2': 'shadow_mixed_2_losses.csv',
+    'shadow_train_only_0': 'shadow_train_only_0_losses.csv',
+    'shadow_train_only_1': 'shadow_train_only_1_losses.csv',
+    'shadow_train_only_2': 'shadow_train_only_2_losses.csv',
+    'shadow_test_only_0': 'shadow_test_only_0_losses.csv',
+    'shadow_test_only_1': 'shadow_test_only_1_losses.csv',
+    'shadow_test_only_2': 'shadow_test_only_2_losses.csv',
+    'target': 'target_model_losses.csv'
+}
 
-file_names = {f'shadow_{i}': f'shadow_model_{i}_losses.csv' for i in range(num_shadow)}
-file_names['target'] = 'target_model_losses.csv'
+# Association des types de modèle à des couleurs
+color_map = {
+    'shadow_test_only': 'blue',
+    'shadow_train_only': 'green',
+    'shadow_mixed': 'orange',
+    'target': 'red'
+}
 
-# Créer une nouvelle figure avec une taille adaptée à beaucoup de courbes
-plt.figure(figsize=(14, 8))
+# Création du graphique
+plt.figure(figsize=(12, 7))
 
-# Palette de couleurs distinctes
-colors = plt.cm.tab20.colors  # Utilise une palette avec 20 couleurs distinctes
-
-# Lire et plotter chaque fichier CSV
-for idx, dir_name in enumerate(directories):
+# Chargement et affichage
+for dir_name in directories:
     file_path = os.path.join(dir_name, file_names.get(dir_name, ''))
     
     try:
-        # Lire le fichier CSV
         df = pd.read_csv(file_path)
-        
-        # Choisir une couleur - on réutilise les couleurs si plus de 20 modèles
-        color = colors[idx % len(colors)]
-        
-        # Style différent pour le target model
-        #linewidth = 3 if dir_name == 'target' else 2
-        #linestyle = '-' if dir_name == 'target' else '--'
-        linewidth = 0.8
-        linestyle = '-'
-        
-        # Plotter la courbe Train Loss
-        plt.plot(df['Epoch'], df['Train Loss'], 
-                color=color,
-                linewidth=linewidth,
-                linestyle=linestyle,
-                label=f'{dir_name.replace("_", " ").title()}')
+
+        # Détection du type de modèle
+        if "shadow_test_only" in dir_name:
+            color = color_map['shadow_test_only']
+        elif "shadow_train_only" in dir_name:
+            color = color_map['shadow_train_only']
+        elif "shadow_mixed" in dir_name:
+            color = color_map['shadow_mixed']
+        elif "target" in dir_name:
+            color = color_map['target']
+        else:
+            color = 'black'  # Défaut
+
+        # Affichage
+        plt.plot(df['Epoch'], df['Train Loss'],
+                 label=dir_name.replace("_", " ").title(),
+                 linewidth=2,
+                 color=color)
 
     except FileNotFoundError:
-        print(f"⚠ Fichier non trouvé : {file_path}")
+        print(f"⚠️ Fichier non trouvé : {file_path}")
     except Exception as e:
-        print(f"Erreur avec le fichier {file_path}: {str(e)}")
+        print(f" Erreur avec le fichier {file_path}: {str(e)}")
 
-# Personnalisation avancée du graphique
+# Finalisation du graphe
 plt.xlabel('Epoch', fontsize=12)
 plt.ylabel('Train Loss', fontsize=12)
-plt.title('Comparaison des Train Loss: Shadow Models (0-19) vs Target', fontsize=14, pad=20)
-plt.grid(True, linestyle=':', alpha=0.6)
+plt.title('Comparaison des Train Loss des modèles', fontsize=14, pad=20)
+plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
 
-# Légende externe à droite avec défilement si nécessaire
-plt.legend(fontsize=9, 
-          bbox_to_anchor=(1.05, 1), 
-          loc='upper left',
-          ncol=1,
-          title='Modèles')
-
-# Ajuster les marges
-plt.tight_layout(rect=[0, 0, 0.85, 1])  # Réduit la largeur pour faire place à la légende
-
-# Enregistrer la figure
-output_filename = 'comparaison_train_losses.png'
+# Sauvegarde
+output_filename = 'comparaison_train_losses_colored.png'
 plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-print(f"Graphique sauvegardé sous {output_filename}")
+print(f" Graphique sauvegardé sous {output_filename}")
 
-# Fermer la figure
 plt.close()

@@ -78,11 +78,10 @@ class ViTWithTrajectory(nn.Module):
             
             avg_train_loss = epoch_train_loss / len(train_loader)
             self.train_loss_history.append(avg_train_loss)
-            
-            avg_val_loss = self.evaluate(val_loader, criterion, device)
-            self.val_loss_history.append(avg_val_loss)
-            
-            print(f"Epoch {epoch+1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
+            if val_loader is not None:
+                avg_val_loss = self.evaluate(val_loader, criterion, device)
+                self.val_loss_history.append(avg_val_loss)
+                print(f"Epoch {epoch+1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
             
             # Enregistrement du modèle
             """if save_path:

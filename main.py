@@ -19,14 +19,9 @@ dim = 64
 depth = 6
 heads = 8
 mlp_dim = 256
-epochs = 4
+epochs = 60
 batch_size = 64
-"""
-MNIST (70k)
-├── Target (30k train) → Modèle cible
-├── Shadow (30k train) → 5× (25k train + 5k val)
-└── Test (10k) → Évaluation
-"""
+
 
 # Chargement des données MNIST
 transform = transforms.Compose(
@@ -219,6 +214,11 @@ for i in range(num_shadow_models):
     )
     shadow_models.append(model)
 
+test_loader = DataLoader(
+    Subset(test_dataset, indices=range(5000)),  # On prend les premiers 5000 du test set
+    batch_size=batch_size,
+    shuffle=False
+)
     # Après entraînement
 mia_results = shadow_models[-1].evaluate_model(  # On utilise le dernier shadow model
     member_loader=val_loader,
@@ -247,12 +247,11 @@ optimal_idx = np.argmax(tpr - fpr)
 optimal_threshold = -thresholds[optimal_idx]
 
 print(f"\nSeuil optimal calculé: {optimal_threshold:.4f}")
-print(f"Seuil du tuteur: 2.35")
 
-# Validation avec le seuil de 2.35
-predictions = (all_losses < 2.35).astype(int)
+# Validation avec le seuil optimal
+predictions = (all_losses < optimal_threshold).astype(int)
 accuracy = (predictions == labels).mean()
-print(f"\nPerformance avec seuil=2.35:")
+print(f"\nPerformance avec seuil optimal {optimal_threshold:.4f}")
 print(f"- Exactitude: {accuracy:.2%}")
 print(f"- Vrais positifs: {(predictions[labels == 1] == 1).mean():.2%}")
 print(f"- Faux positifs: {(predictions[labels == 0] == 1).mean():.2%}")
