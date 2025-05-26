@@ -59,7 +59,7 @@ for dir_name in directories:
                  color=color)
 
     except FileNotFoundError:
-        print(f"⚠️ Fichier non trouvé : {file_path}")
+        print(f"Fichier non trouvé : {file_path}")
     except Exception as e:
         print(f" Erreur avec le fichier {file_path}: {str(e)}")
 

@@ -19,7 +19,7 @@ dim = 64
 depth = 6
 heads = 8
 mlp_dim = 256
-epochs = 3
+epochs = 13
 batch_size = 64
 
 
@@ -88,8 +88,8 @@ optimizer = torch.optim.Adam(target_model.parameters(), lr=0.001)
 print("Training target model...")
 target_model.train_model(
     target_loader,
-    # shadow_loader,
-    None,
+    shadow_loader,
+    #None,
     epochs,
     criterion,
     optimizer,
@@ -116,7 +116,7 @@ for i in range(num_shadow_models):
         mlp_dim=mlp_dim
     ).to(device)
     
-    # Prend 25k du shadow_train (80%) + 5k validation (20%)
+    # Prend 25k du train_dataset (80%) + 5k validation (20%)
     indices = np.random.choice(len(shadow_train), 25000, replace=False)
     train_subset = Subset(shadow_train, indices)
     train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
