@@ -19,7 +19,7 @@ dim = 64
 depth = 6
 heads = 8
 mlp_dim = 256
-epochs = 13
+epochs = 6
 batch_size = 64
 
 
@@ -88,7 +88,9 @@ optimizer = torch.optim.Adam(target_model.parameters(), lr=0.001)
 print("Training target model...")
 target_model.train_model(
     target_loader,
-    shadow_loader,
+    target_loader,  # Utilise le même loader pour train et val
+    # Pour l'attaque MIA, on peut utiliser le même loader pour train et val
+    #shadow_loader,
     #None,
     epochs,
     criterion,
@@ -219,32 +221,42 @@ test_loader = DataLoader(
     batch_size=batch_size,
     shuffle=False
 )
-    # Après entraînement
-mia_results = shadow_models[-1].evaluate_model(  # On utilise le dernier shadow model
-    member_loader=val_loader,
-    non_member_loader=test_loader,
-    criterion=criterion,
-    device=device
-)
+# Après entraînement
+member_losses = []
+non_member_losses = []
 
+# Évaluation de chaque shadow modèle
+for i in range(num_shadow_models):
+    mia_results = shadow_models[i].evaluate_model(
+        member_loader=val_loader,
+        non_member_loader=test_loader,
+        criterion=criterion,
+        device=device
+    )
+
+    # Collecte des pertes pour chaque modèle
+    member_losses.extend(mia_results['member_losses'])
+    non_member_losses.extend(mia_results['non_member_losses'])
 
 # Calcul des métriques de base
-member_loss = np.mean(mia_results['member_losses'])
-non_member_loss = np.mean(mia_results['non_member_losses'])
+member_loss = np.mean(member_losses)
+non_member_loss = np.mean(non_member_losses)
 print(f"Perte moyenne membres: {member_loss:.4f}")
 print(f"Perte moyenne non-membres: {non_member_loss:.4f}")
 print(f"Différence: {non_member_loss - member_loss:.4f}")
 
-# Calcul du seuil optimal 
-all_losses = np.concatenate([mia_results['member_losses'], mia_results['non_member_losses']])
+# Calcul du seuil optimal
+all_losses = np.concatenate([member_losses, non_member_losses])
 labels = np.concatenate([
-    np.ones(len(mia_results['member_losses'])),
-    np.zeros(len(mia_results['non_member_losses']))
+    np.ones(len(member_losses)),
+    np.zeros(len(non_member_losses))
 ])
 
-fpr, tpr, thresholds = roc_curve(labels, -all_losses)  # Note: on utilise -loss pour avoir > = membre
+fpr, tpr, thresholds = roc_curve(labels, -all_losses)  # Note: on utilise -loss pour avoir >= membre
 optimal_idx = np.argmax(tpr - fpr)
 optimal_threshold = -thresholds[optimal_idx]
+
+print(f"\nSeuil optimal calculé: {optimal_threshold:.4f}")
 
 print(f"\nSeuil optimal calculé: {optimal_threshold:.4f}")
 
@@ -257,7 +269,7 @@ print(f"- Vrais positifs: {(predictions[labels == 1] == 1).mean():.2%}")
 print(f"- Faux positifs: {(predictions[labels == 0] == 1).mean():.2%}")
 
 
-# (Tout votre code existant jusqu'à la fin reste inchangé...)
+
 # =============================================
 # VISUALISATION ET SAUVEGARDE DES RÉSULTATS
 # =============================================

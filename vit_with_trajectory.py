@@ -78,7 +78,8 @@ class ViTWithTrajectory(nn.Module):
             
             avg_train_loss = epoch_train_loss / len(train_loader)
             self.train_loss_history.append(avg_train_loss)
-            if val_loader is not None:
+            #if val_loader is not None:
+            if True:
                 avg_val_loss = self.evaluate(val_loader, criterion, device)
                 self.val_loss_history.append(avg_val_loss)
                 print(f"Epoch {epoch+1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
@@ -89,14 +90,14 @@ class ViTWithTrajectory(nn.Module):
                 model_file = os.path.join(save_path, f"{model_name}_epoch_{epoch+1}.pth")
                 torch.save(self.state_dict(), model_file) """
 
-        # Enregistrement des losses après entraînement
-        if save_path:
-            loss_file = os.path.join(save_path, f"{model_name}_losses.csv")
-            with open(loss_file, mode='w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(["Epoch", "Train Loss", "Validation Loss"])
-                for epoch, (train_loss, val_loss) in enumerate(zip(self.train_loss_history, self.val_loss_history), start=1):
-                    writer.writerow([epoch, train_loss, val_loss])
+            # Enregistrement des losses après entraînement
+            if save_path:
+                loss_file = os.path.join(save_path, f"{model_name}_losses.csv")
+                with open(loss_file, mode='w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["Epoch", "Train Loss", "Validation Loss"])
+                    for epoch, (train_loss, val_loss) in enumerate(zip(self.train_loss_history, self.val_loss_history), start=1):
+                        writer.writerow([epoch, train_loss, val_loss])
 
     
     def evaluate(self, loader, criterion, device):
