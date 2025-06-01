@@ -3,9 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Configuration des répertoires à explorer
-directories = [f"shadow_test_only_{i}" for i in range(3)] + \
-              [f"shadow_train_only_{i}" for i in range(3)] + \
-              [f"shadow_mixed_{i}" for i in range(3)] + \
+directories = [f"shadow_test_only_{i}" for i in range(6)] + \
+              [f"shadow_train_only_{i}" for i in range(6)] + \
+              [f"shadow_mixed_{i}" for i in range(6)] + \
               ["target"]
 
 # Fichiers attendus
@@ -13,12 +13,21 @@ file_names = {
     'shadow_mixed_0': 'shadow_mixed_0_losses.csv',
     'shadow_mixed_1': 'shadow_mixed_1_losses.csv',
     'shadow_mixed_2': 'shadow_mixed_2_losses.csv',
+    'shadow_mixed_3': 'shadow_mixed_3_losses.csv',
+    'shadow_mixed_4': 'shadow_mixed_4_losses.csv',
+    'shadow_mixed_5': 'shadow_mixed_5_losses.csv',
     'shadow_train_only_0': 'shadow_train_only_0_losses.csv',
     'shadow_train_only_1': 'shadow_train_only_1_losses.csv',
     'shadow_train_only_2': 'shadow_train_only_2_losses.csv',
+    'shadow_train_only_3': 'shadow_train_only_3_losses.csv',
+    'shadow_train_only_4': 'shadow_train_only_4_losses.csv',
+    'shadow_train_only_5': 'shadow_train_only_5_losses.csv',
     'shadow_test_only_0': 'shadow_test_only_0_losses.csv',
     'shadow_test_only_1': 'shadow_test_only_1_losses.csv',
     'shadow_test_only_2': 'shadow_test_only_2_losses.csv',
+    'shadow_test_only_3': 'shadow_test_only_3_losses.csv',
+    'shadow_test_only_4': 'shadow_test_only_4_losses.csv',
+    'shadow_test_only_5': 'shadow_test_only_5_losses.csv',
     'target': 'target_model_losses.csv'
 }
 

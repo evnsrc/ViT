@@ -19,7 +19,7 @@ dim = 64
 depth = 6
 heads = 8
 mlp_dim = 256
-epochs = 6
+epochs = 80
 batch_size = 64
 
 
@@ -101,7 +101,7 @@ target_model.train_model(
 )
 
 # 2. RECONFIGURATION DES SHADOW MODELS
-num_shadow_models = 1
+num_shadow_models = 6
 
 shadow_models = []
 
